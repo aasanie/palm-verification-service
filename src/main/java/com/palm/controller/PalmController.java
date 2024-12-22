@@ -17,32 +17,25 @@ public class PalmController {
     private PalmService palmService;
 
     // Endpoint to validate a palm binary
-    @PostMapping("/validate")
-    public ResponseEntity<Boolean> validatePalmBinary(@RequestBody Map<String, String> request) {
-        String palmId = request.get("palmId");
-        String palmBinaryBase64 = request.get("palmBinary");
+    @PostMapping(value = "/validate", consumes = "application/octet-stream")
+    public ResponseEntity<Boolean> validatePalmBinary(@RequestParam String palm_id, @RequestBody byte[] palm_binary) {
 
-        if (palmId == null || palmBinaryBase64 == null) {
+        if (palm_id == null || palm_binary == null) {
             return ResponseEntity.badRequest().body(false);
         }
 
-        byte[] palmBinary = Base64.getDecoder().decode(palmBinaryBase64);
-        boolean isValid = palmService.matchPalmBinary(palmId, palmBinary);
+        boolean isValid = palmService.matchPalmBinary(palm_id, palm_binary);
         return ResponseEntity.ok(isValid);
     }
 
     // Endpoint to store a palm binary
-    @PostMapping("/store")
-    public ResponseEntity<String> storePalmBinary(@RequestBody Map<String, String> request) {
-        String palmId = request.get("palmId");
-        String schoolId = request.get("schoolId");
-        String palmBinaryBase64 = request.get("palmBinary");
+    @PostMapping(value = "/store", consumes = "application/octet-stream")
+    public ResponseEntity<String> storePalmBinary(@RequestParam String schoolId, @RequestParam String palmId, @RequestBody byte[] palmBinary) {
 
-        if (palmId == null || schoolId == null || palmBinaryBase64 == null) {
+        if (palmId == null || schoolId == null || palmBinary == null) {
             return ResponseEntity.badRequest().body("Invalid input data");
         }
 
-        byte[] palmBinary = Base64.getDecoder().decode(palmBinaryBase64);
         PalmData palmData = new PalmData(palmId, schoolId, palmBinary);
 
         palmService.savePalmBinary(palmData);
